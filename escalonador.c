@@ -29,6 +29,7 @@ int e_inicializar(Escalonador **e, int caixas, int delta_t, int n_1, int n_2, in
 
 int e_inserir_por_fila (Escalonador *e, int classe, int num_conta, int qtde_operacoes)
 {
+    //Na inserção na fila, num_conta é a chave e qtde_operacoes é valor.
     int ins_sucess;
     switch(classe)
     {
@@ -151,10 +152,12 @@ int e_consultar_prox_qtde_oper(Escalonador *e)
     int conta_5 = f_consultar_proxima_chave(&e->fila_5);
 
 
-    if(conta_prox == conta_1)
-    {
-        
-    }
+    if(conta_prox == conta_1) return f_consultar_proximo_valor(&e->fila_1);
+    else if(conta_prox == conta_2) return f_consultar_proximo_valor(&e->fila_2);
+    else if(conta_prox == conta_3) return f_consultar_proximo_valor(&e->fila_3);
+    else if(conta_prox == conta_4) return f_consultar_proximo_valor(&e->fila_4);
+    else if(conta_prox == conta_5) return f_consultar_proximo_valor(&e->fila_5);
+    else return -1;
 }
 int main()
 {
@@ -166,11 +169,13 @@ int main()
     e_inserir_por_fila(e,1,2,3);
     e_inserir_por_fila(e,3,40,1);
     int conta = e_consultar_prox_num_conta(e);
-    printf("\nProxima Conta: %d", conta);
+    int q;
+    printf("\nOperacoes: %d Proxima Conta: %d", e_consultar_prox_qtde_oper(e), conta);
 
     while(e_consultar_prox_num_conta(e) > 0)
     {
+        q = e_consultar_prox_qtde_oper(e);
         conta = e_obter_prox_num_conta(e);
-        printf("\nProxima Conta: %d", conta);
+        printf("\nOperacoes: %d Proxima Conta: %d", q, conta);
     }
 }
