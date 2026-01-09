@@ -77,8 +77,8 @@ int f_consultar_proximo_valor(Fila_FIFO **f)
 int f_num_elementos(Fila_FIFO **f)
 {
 	if((*f) == NULL) return 0;
-	
-	return (*f)->tamanho;
+	int tamanho = (*f)->tamanho;
+	return tamanho;
 }
 
 int f_consultar_chave_por_posicao(Fila_FIFO **f, int posicao)

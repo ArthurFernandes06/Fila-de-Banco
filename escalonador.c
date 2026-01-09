@@ -55,14 +55,15 @@ int e_inserir_por_fila (Escalonador *e, int classe, int num_conta, int qtde_oper
 }
 int e_consultar_qtde_clientes (Escalonador *e)
 {
-    int tam_f1,tam_f2,tam_f3,tam_f4,tam_f5;
+    int tam_f1,tam_f2,tam_f3,tam_f4,tam_f5, total;
     tam_f1 = f_num_elementos(&e->fila_1);
     tam_f2 = f_num_elementos(&e->fila_2);
     tam_f3 = f_num_elementos(&e->fila_3);
     tam_f4 = f_num_elementos(&e->fila_4);
     tam_f5 = f_num_elementos(&e->fila_5);
 
-    return tam_f1 + tam_f2 + tam_f3 + tam_f4 + tam_f5;
+    total = tam_f1 + tam_f2 + tam_f3 + tam_f4 + tam_f5;
+    return total;
 }
 
 int e_consultar_prox_num_conta(Escalonador *e)
@@ -163,19 +164,22 @@ int main()
 {
     Escalonador *e;
     e_inicializar(&e,5,1,1,1,1,1,1);
-     
-    e_inserir_por_fila(e,2,1,10);
-    e_inserir_por_fila(e,1,22,3);
-    e_inserir_por_fila(e,1,2,3);
-    e_inserir_por_fila(e,3,40,1);
+    printf("aaaaa\n");
+    printf("\n%d",e_inserir_por_fila(e,2,1,10));
+    printf("\n%d",e_inserir_por_fila(e,1,22,3));
+    printf("\n%d",e_inserir_por_fila(e,1,2,3));
+    printf("\n%d",e_inserir_por_fila(e,3,40,1));
     int conta = e_consultar_prox_num_conta(e);
     int q;
     printf("\nOperacoes: %d Proxima Conta: %d", e_consultar_prox_qtde_oper(e), conta);
 
+    /*
     while(e_consultar_prox_num_conta(e) > 0)
     {
         q = e_consultar_prox_qtde_oper(e);
         conta = e_obter_prox_num_conta(e);
         printf("\nOperacoes: %d Proxima Conta: %d", q, conta);
     }
+    */
+   return 0;
 }
