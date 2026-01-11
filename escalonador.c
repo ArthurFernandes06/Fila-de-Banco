@@ -1,6 +1,4 @@
 #include "escalonador.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 int e_inicializar(Escalonador **e, int caixas, int delta_t, int n_1, int n_2, int n_3, int n_4, int n_5)
 {
@@ -208,24 +206,104 @@ int e_consultar_tempo_prox_cliente (Escalonador *e)
     else return -1;
 
 }
+int e_conf_por_arquivo (Escalonador **e, char *nome_arq_conf)
+{
+    /*
+    Realiza a configuração de inicialização do escalonador através da leitura do arquivo de configuração de nome
+    “nome_arq_conf”, retornando 1 em caso de sucesso e 0 caso contrário.
+    */
+
+    FILE *arq = fopen(nome_arq_conf, "r");
+    if(arq == NULL) return 0;
+
+    //Dados escalonador
+    char linha[256];
+    int delta_t, caixas;
+    int d1,d2,d3,d4,d5;
+
+    //Dados Clientes
+    char tipo[20];
+    int conta, operacoes;
+    int fila = -1;
+
+    //Aqui é feita a validação e leitura dos caixas
+    if(!fgets(linha, sizeof(linha), arq))
+    {
+        fclose(arq);
+        return 0;
+    }
+    if(sscanf(linha, "qtde de caixas = %d", &caixas) != 1)
+    {
+        fclose(arq);
+        return 0;
+    }
+
+    //Validação e leitura do delta_t
+    if(!fgets(linha, sizeof(linha), arq))
+    {
+        fclose(arq);
+        return 0;
+    }
+    if(sscanf(linha, "delta t = %d", &delta_t) != 1)
+    {
+        fclose(arq);
+        return 0;
+    }
+
+    //Validação e leitura das disciplinas de escalonamento
+    if(!fgets(linha, sizeof(linha), arq))
+    {
+        fclose(arq);
+        return 0;
+    }
+    if(sscanf(linha,"disciplina de escalonamento = {%d,%d,%d,%d,%d}", &d1, &d2, &d3, &d4, &d5) != 5)
+    {
+        fclose(arq);
+        return 0;
+    }
+
+
+    if(!e_inicializar(e,caixas,delta_t,d1,d2,d3,d4,d5))
+    {
+        fclose(arq);
+        return 0;
+    }
+
+
+    while(fgets(linha, sizeof(linha), arq))
+    {
+        fila = -1;
+        //Se tiver uma linha com dados inválidos o programa pula a leitura
+        if(sscanf(linha, "%19s - conta %d - %d operacao", tipo, &conta, &operacoes) == 3)
+        {
+            if(strcmp(tipo, "Premium") == 0) fila = 1;
+            else if(strcmp(tipo, "Ouro") == 0) fila = 2;
+            else if(strcmp(tipo, "Prata") == 0) fila = 3;
+            else if(strcmp(tipo, "Bronze") == 0) fila = 4;
+            else if(strcmp(tipo, "Leezu") == 0) fila = 5;
+
+            if(fila != -1) e_inserir_por_fila(*e, fila, conta, operacoes);
+        }
+
+    }
+    fclose(arq);
+    return 1;
+}
 int main()
 {
     Escalonador *e;
-    e_inicializar(&e,5,2,1,1,1,1,1);
-    printf("aaaaa\n");
-    printf("\n%d",e_inserir_por_fila(e,2,1,10));
-    printf("\n%d",e_inserir_por_fila(e,1,22,3));
-    printf("\n%d",e_inserir_por_fila(e,1,2,3));
-    printf("\n%d",e_inserir_por_fila(e,3,40,1));
+    e_conf_por_arquivo(&e,"entrada-0001.txt");
     int conta = e_consultar_prox_num_conta(e);
     int q;
     printf("\nOperacoes: %d Proxima Conta: %d", e_consultar_prox_qtde_oper(e), conta);
     printf("\nProx fila: %d",e_consultar_prox_fila(e));
-    while(e_consultar_prox_num_conta(e) > 0)
+    int i =0;
+    while(i < 10)
     {
         q = e_consultar_tempo_prox_cliente(e);
         conta = e_obter_prox_num_conta(e);
         printf("\nTempo: %d Proxima Conta: %d", q, conta);
+        i++;
     }
     
    return 0;
