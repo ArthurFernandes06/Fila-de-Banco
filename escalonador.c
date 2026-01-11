@@ -146,7 +146,7 @@ int e_obter_prox_num_conta(Escalonador *e)
 
 int e_consultar_prox_qtde_oper(Escalonador *e)
 {
-    //Verificar se a conta está vazia.
+    
     int conta_prox = e_consultar_prox_num_conta(e);
     int conta_1 = f_consultar_proxima_chave(&e->fila_1);
     int conta_2 = f_consultar_proxima_chave(&e->fila_2);
@@ -165,6 +165,10 @@ int e_consultar_prox_qtde_oper(Escalonador *e)
 
 int e_consultar_prox_fila (Escalonador *e)
 {
+    /*
+        Usando a lógica da disciplina do escalonador para consultar a próxima conta,
+        aqui a gente só compara de qual fila é essa próxima conta e retorna o número da fila.
+    */
     int conta_prox = e_consultar_prox_num_conta(e);
     int conta_1 = f_consultar_proxima_chave(&e->fila_1);
     int conta_2 = f_consultar_proxima_chave(&e->fila_2);
@@ -181,10 +185,33 @@ int e_consultar_prox_fila (Escalonador *e)
     else return -1;
 }
 
+int e_consultar_tempo_prox_cliente (Escalonador *e)
+{
+    /*
+        Usando a mesma lógica do e_consultar_prox_fila, a gente vai checar a próxima conta,
+        vamos checar de qual fila essa conta é, consultar a quantidade de operações usando a 
+        função e_consultar_prox_qtde_oper() e retornar as operações vezes o delta_t.
+    */
+    int conta_prox = e_consultar_prox_num_conta(e);
+    int conta_1 = f_consultar_proxima_chave(&e->fila_1);
+    int conta_2 = f_consultar_proxima_chave(&e->fila_2);
+    int conta_3 = f_consultar_proxima_chave(&e->fila_3);
+    int conta_4 = f_consultar_proxima_chave(&e->fila_4);
+    int conta_5 = f_consultar_proxima_chave(&e->fila_5);
+
+
+    if(conta_prox == conta_1) return f_consultar_proximo_valor(&e->fila_1) * e->delta_t;
+    else if(conta_prox == conta_2) return f_consultar_proximo_valor(&e->fila_2) * e->delta_t;
+    else if(conta_prox == conta_3) return f_consultar_proximo_valor(&e->fila_3) * e->delta_t;
+    else if(conta_prox == conta_4) return f_consultar_proximo_valor(&e->fila_4) * e->delta_t;
+    else if(conta_prox == conta_5) return f_consultar_proximo_valor(&e->fila_5) * e->delta_t;
+    else return -1;
+
+}
 int main()
 {
     Escalonador *e;
-    e_inicializar(&e,5,1,1,1,1,1,1);
+    e_inicializar(&e,5,2,1,1,1,1,1);
     printf("aaaaa\n");
     printf("\n%d",e_inserir_por_fila(e,2,1,10));
     printf("\n%d",e_inserir_por_fila(e,1,22,3));
@@ -194,12 +221,11 @@ int main()
     int q;
     printf("\nOperacoes: %d Proxima Conta: %d", e_consultar_prox_qtde_oper(e), conta);
     printf("\nProx fila: %d",e_consultar_prox_fila(e));
-    
     while(e_consultar_prox_num_conta(e) > 0)
     {
-        q = e_consultar_prox_qtde_oper(e);
+        q = e_consultar_tempo_prox_cliente(e);
         conta = e_obter_prox_num_conta(e);
-        printf("\nOperacoes: %d Proxima Conta: %d", q, conta);
+        printf("\nTempo: %d Proxima Conta: %d", q, conta);
     }
     
    return 0;
