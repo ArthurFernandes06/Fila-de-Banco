@@ -294,42 +294,69 @@ void e_rodar(Escalonador **e, char *nome_arq_in, char *nome_arq_out)
     e_conf_por_arquivo(e,nome_arq_in);
     FILE *arq = fopen(nome_arq_out, "w");
     int t_lista_caixa = 0;
-    int caixa = 1, tempo, tipo, conta, oper;
-    int caixa_livre, tempo_decorrido = 0;
+    int caixa = 1;
+    int oper, tipo,conta;
+    int tempo_saida,tempo_entrada;
     char categoria[32];
 
     CaixaNoABB *C = NULL;
     CaixaNoABB *C_atual = NULL;
+
     while(t_lista_caixa < (*e)->caixas && e_consultar_qtde_clientes(*e) > 0)
     {
         oper = e_consultar_prox_qtde_oper(*e);
         tipo = e_consultar_prox_fila(*e);
         conta = e_obter_prox_num_conta(*e);
 
-        c_adicionar_caixa_abb(&C, caixa, tempo_decorrido, tipo, conta, oper);
+        c_adicionar_caixa_abb(&C, caixa, (*e)->delta_t * oper,0, tipo, conta, oper);
+        
+        if(tipo == 1) strcpy(categoria, "Premium");
+        else if(tipo == 2) strcpy(categoria,"Ouro");
+        else if(tipo == 3) strcpy(categoria,"Prata");
+        else if(tipo == 4) strcpy(categoria,"Bronze");
+        else strcpy(categoria, "Leezu");
+
+        
+        fprintf(arq,"T = %d min: Caixa %d chama da categoria %s cliente da conta %d para realizar %d operacao(oes).\n",
+            0,caixa,categoria,conta,oper);
+
         caixa++;
         t_lista_caixa++;
     }
-    while(t_lista_caixa > 0 )
+
+
+    while(t_lista_caixa > 0)
     {  
-        C_atual = c_consultar_prox_caixa(C);
-        caixa = C_atual->caixa;
-        conta = C_atual->conta;
-        tempo = C_atual->tempo;
-        oper = C_atual->oper;
+        
+        if(e_consultar_qtde_clientes(*e) > 0)
+        {
+            C_atual = c_consultar_prox_caixa(C);
+            oper = e_consultar_prox_qtde_oper(*e);
+            tipo = e_consultar_prox_fila(*e);
+            if(tipo == 1) strcpy(categoria, "Premium");
+            else if(tipo == 2) strcpy(categoria,"Ouro");
+            else if(tipo == 3) strcpy(categoria,"Prata");
+            else if(tipo == 4) strcpy(categoria,"Bronze");
+            else strcpy(categoria, "Leezu");
 
-        if(C->tipo == 1) strcpy(categoria, "Premium");
-        else if(C->tipo == 2) strcpy(categoria,"Ouro");
-        else if(C->tipo == 3) strcpy(categoria,"Prata");
-        else if(C->tipo == 4) strcpy(categoria,"Bronze");
-        else strcpy(categoria, "Leezu");
+            conta = e_obter_prox_num_conta(*e);
+            caixa = C_atual->caixa;
+            tempo_entrada = C_atual->tempo_saida;
+            tempo_saida = tempo_entrada + oper*(*e)->delta_t;
+            c_adicionar_caixa_abb(&C,C_atual->caixa,tempo_saida,tempo_entrada,tipo,conta,oper);
 
-        fprintf(arq,"T = %d min: Caixa %d chama da categoria %s cliente da conta %d para realizar %d operacao(oes).\n",tempo,caixa,categoria,conta,oper);
+            fprintf(arq,"T = %d min: Caixa %d chama da categoria %s cliente da conta %d para realizar %d operacao(oes).\n",
+            tempo_entrada,caixa,categoria,conta,oper);
 
+            t_lista_caixa++;
+
+        }
         c_retirar_prox_no(&C);
-        tempo_decorrido += tempo;
         t_lista_caixa--;
     }
+
+
+    
 
     fclose(arq);
 }

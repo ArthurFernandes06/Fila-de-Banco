@@ -78,13 +78,14 @@ float log_media_por_classe(Log **l, int classe)
 	return log_obter_soma_por_classe(l,classe)/total;
 }
 
-CaixaNoABB *criar_no_caixa(int caixa, int tempo, int tipo, int conta, int oper)
+CaixaNoABB *criar_no_caixa(int caixa, int tempo_saida,int tempo_entrada, int tipo, int conta, int oper)
 {
 	CaixaNoABB *novo = malloc(sizeof(CaixaNoABB));
 	if(novo == NULL) return NULL;
 
 	novo->caixa = caixa;
-	novo->tempo = tempo;
+	novo->tempo_entrada = tempo_entrada;
+	novo->tempo_saida = tempo_saida;
 	novo->tipo = tipo;
 	novo->conta = conta;
 	novo->oper = oper;
@@ -93,9 +94,9 @@ CaixaNoABB *criar_no_caixa(int caixa, int tempo, int tipo, int conta, int oper)
 
 	return novo;
 }
-int c_adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo, int tipo, int conta, int oper)
+int c_adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo_saida, int tempo_entrada, int tipo, int conta, int oper)
 {
-	CaixaNoABB *novo = criar_no_caixa(caixa,tempo, tipo,conta,oper);
+	CaixaNoABB *novo = criar_no_caixa(caixa,tempo_saida,tempo_entrada, tipo,conta,oper);
 	if(novo == NULL) return 0;
 
 	if(*C == NULL)
@@ -108,11 +109,11 @@ int c_adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo, int tipo, int co
 	while(p != NULL)
 	{
 		p_pai = p;
-		if(p->tempo > tempo)
+		if(p->tempo_saida > tempo_saida)
 		{
 			p = p->esq;
 
-		}else if(p->tempo < tempo)
+		}else if(p->tempo_saida < tempo_saida)
 		{
 			p = p->dir;
 		}else
@@ -122,10 +123,10 @@ int c_adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo, int tipo, int co
 		}
 	}
 	
-	if(p_pai->tempo > tempo)
+	if(p_pai->tempo_saida > tempo_saida)
 	{
 		p_pai->esq = novo;
-	}else if(p_pai->tempo < tempo)
+	}else if(p_pai->tempo_saida < tempo_saida)
 	{
 		p_pai->dir = novo;
 	}else

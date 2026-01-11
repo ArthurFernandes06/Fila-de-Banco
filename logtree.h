@@ -19,7 +19,8 @@
 
 	typedef struct CaixaNoABB
 	{
-		int tempo;
+		int tempo_saida;
+		int tempo_entrada;
 		int caixa;
 		int tipo;
 		int conta;
@@ -34,8 +35,8 @@
 	float log_media_por_classe(Log **l, int classe);
 	int log_obter_soma_por_classe(Log **l, int classe);
 	int log_obter_contagem_por_classe(Log **l, int classe);
-	CaixaNoABB *criar_no_caixa(int caixa, int tempo, int tipo, int conta, int oper);
-	int c_adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo, int tipo, int conta, int oper);
+	CaixaNoABB *criar_no_caixa(int caixa, int tempo_saida,int tempo_entrada, int tipo, int conta, int oper);
+	int c_adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo_saida,int tempo_entrada, int tipo, int conta, int oper);
 	CaixaNoABB *c_consultar_prox_caixa(CaixaNoABB* C);
 	int c_retirar_prox_no(CaixaNoABB **C);
 
