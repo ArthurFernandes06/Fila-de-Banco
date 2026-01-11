@@ -289,22 +289,47 @@ int e_conf_por_arquivo (Escalonador **e, char *nome_arq_conf)
     fclose(arq);
     return 1;
 }
-int main()
+void e_rodar(Escalonador **e, char *nome_arq_in, char *nome_arq_out)
 {
-    Escalonador *e;
-    e_conf_por_arquivo(&e,"entrada-0001.txt");
-    int conta = e_consultar_prox_num_conta(e);
-    int q;
-    printf("\nOperacoes: %d Proxima Conta: %d", e_consultar_prox_qtde_oper(e), conta);
-    printf("\nProx fila: %d",e_consultar_prox_fila(e));
-    int i =0;
-    while(i < 10)
+    e_conf_por_arquivo(e,nome_arq_in);
+    FILE *arq = fopen(nome_arq_out, "w");
+    int t_lista_caixa = 0;
+    int caixa = 1, tempo, tipo, conta, oper;
+    int caixa_livre, tempo_decorrido = 0;
+    char categoria[32];
+
+    CaixaNoABB *C = NULL;
+    CaixaNoABB *C_atual = NULL;
+    while(t_lista_caixa < (*e)->caixas && e_consultar_qtde_clientes(*e) > 0)
     {
-        q = e_consultar_tempo_prox_cliente(e);
-        conta = e_obter_prox_num_conta(e);
-        printf("\nTempo: %d Proxima Conta: %d", q, conta);
-        i++;
+        oper = e_consultar_prox_qtde_oper(*e);
+        tipo = e_consultar_prox_fila(*e);
+        conta = e_obter_prox_num_conta(*e);
+
+        c_adicionar_caixa_abb(&C, caixa, tempo_decorrido, tipo, conta, oper);
+        caixa++;
+        t_lista_caixa++;
     }
-    
-   return 0;
+    while(t_lista_caixa > 0 )
+    {  
+        C_atual = c_consultar_prox_caixa(C);
+        caixa = C_atual->caixa;
+        conta = C_atual->conta;
+        tempo = C_atual->tempo;
+        oper = C_atual->oper;
+
+        if(C->tipo == 1) strcpy(categoria, "Premium");
+        else if(C->tipo == 2) strcpy(categoria,"Ouro");
+        else if(C->tipo == 3) strcpy(categoria,"Prata");
+        else if(C->tipo == 4) strcpy(categoria,"Bronze");
+        else strcpy(categoria, "Leezu");
+
+        fprintf(arq,"T = %d min: Caixa %d chama da categoria %s cliente da conta %d para realizar %d operacao(oes).\n",tempo,caixa,categoria,conta,oper);
+
+        c_retirar_prox_no(&C);
+        tempo_decorrido += tempo;
+        t_lista_caixa--;
+    }
+
+    fclose(arq);
 }

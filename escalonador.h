@@ -3,6 +3,7 @@
     #include<stdlib.h>
     #include<stdio.h>
     #include"fila_fifo.h"
+    #include"logtree.h"
     #include<string.h>
     
     typedef struct Escalonador
@@ -27,5 +28,5 @@
     int e_consultar_qtde_clientes (Escalonador *e);
     int e_consultar_tempo_prox_cliente (Escalonador *e);
     int e_conf_por_arquivo (Escalonador **e, char *nome_arq_conf);
-    void e_rodar (Escalonador *e, char *nome_arq_in, char *nome_arq_out);
+    void e_rodar(Escalonador **e, char *nome_arq_in, char *nome_arq_out);
 #endif

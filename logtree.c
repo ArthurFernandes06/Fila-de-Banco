@@ -3,7 +3,7 @@ void inicializar(Log **l)
 {
 	(*l) = NULL;
 }
-Log *criar_no(int conta, int classe, int timer, int caixa)
+Log *criar_no_log(int conta, int classe, int timer, int caixa)
 {
 	Log *novo = malloc(sizeof(Log));
 	if (novo == NULL) return NULL;
@@ -21,7 +21,7 @@ Log *criar_no(int conta, int classe, int timer, int caixa)
 
 int log_registrar(Log **l, int conta, int classe, int timer, int caixa)
 {
-	Log *novo = criar_no(conta,classe,timer,caixa);
+	Log *novo = criar_no_log(conta,classe,timer,caixa);
 	if (novo == NULL) return 0;
 	
 	Log *p = (*l);
@@ -78,14 +78,14 @@ float log_media_por_classe(Log **l, int classe)
 	return log_obter_soma_por_classe(l,classe)/total;
 }
 
-CaixaNoABB *criar_no_caixa(int caixa, int tempo, char *tipo, int conta, int oper)
+CaixaNoABB *criar_no_caixa(int caixa, int tempo, int tipo, int conta, int oper)
 {
 	CaixaNoABB *novo = malloc(sizeof(CaixaNoABB));
 	if(novo == NULL) return NULL;
 
 	novo->caixa = caixa;
 	novo->tempo = tempo;
-	strcpy(novo->tipo, tipo);
+	novo->tipo = tipo;
 	novo->conta = conta;
 	novo->oper = oper;
 	novo->dir = NULL;
@@ -93,7 +93,7 @@ CaixaNoABB *criar_no_caixa(int caixa, int tempo, char *tipo, int conta, int oper
 
 	return novo;
 }
-int adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo, char *tipo, int conta, int oper)
+int c_adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo, int tipo, int conta, int oper)
 {
 	CaixaNoABB *novo = criar_no_caixa(caixa,tempo, tipo,conta,oper);
 	if(novo == NULL) return 0;
@@ -137,7 +137,7 @@ int adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo, char *tipo, int co
 	return 1;
 } 
 
-CaixaNoABB *consultar_prox_caixa(CaixaNoABB* C)
+CaixaNoABB *c_consultar_prox_caixa(CaixaNoABB* C)
 {	
 	CaixaNoABB *C_pai = NULL;
 
@@ -149,10 +149,10 @@ CaixaNoABB *consultar_prox_caixa(CaixaNoABB* C)
 	return C_pai;
 }
 
-int retirar_prox_no(CaixaNoABB **C)
+int c_retirar_prox_no(CaixaNoABB **C)
 {
 	if(*C == NULL) return 0;
-	CaixaNoABB  *p = *C,*remov = consultar_prox_caixa(*C), *remov_pai = NULL;
+	CaixaNoABB  *p = *C,*remov = c_consultar_prox_caixa(*C), *remov_pai = NULL;
 
 	while(p != remov)
 	{
