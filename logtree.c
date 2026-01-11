@@ -77,3 +77,95 @@ float log_media_por_classe(Log **l, int classe)
 	
 	return log_obter_soma_por_classe(l,classe)/total;
 }
+
+CaixaNoABB *criar_no_caixa(int caixa, int tempo, char *tipo, int conta, int oper)
+{
+	CaixaNoABB *novo = malloc(sizeof(CaixaNoABB));
+	if(novo == NULL) return NULL;
+
+	novo->caixa = caixa;
+	novo->tempo = tempo;
+	strcpy(novo->tipo, tipo);
+	novo->conta = conta;
+	novo->oper = oper;
+	novo->dir = NULL;
+	novo->esq = NULL;
+
+	return novo;
+}
+int adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo, char *tipo, int conta, int oper)
+{
+	CaixaNoABB *novo = criar_no_caixa(caixa,tempo, tipo,conta,oper);
+	if(novo == NULL) return 0;
+
+	if(*C == NULL)
+	{
+		(*C) = novo;
+		return 1;
+	}
+	CaixaNoABB *p = *C, *p_pai = NULL;
+
+	while(p != NULL)
+	{
+		p_pai = p;
+		if(p->tempo > tempo)
+		{
+			p = p->esq;
+
+		}else if(p->tempo < tempo)
+		{
+			p = p->dir;
+		}else
+		{
+			if(p->caixa > caixa) p = p->esq;
+			else p = p->dir;
+		}
+	}
+	
+	if(p_pai->tempo > tempo)
+	{
+		p_pai->esq = novo;
+	}else if(p_pai->tempo < tempo)
+	{
+		p_pai->dir = novo;
+	}else
+	{
+		if(p_pai->caixa > caixa) p_pai->esq = novo;
+		else p_pai->dir = novo;
+	}
+
+	return 1;
+} 
+
+CaixaNoABB *consultar_prox_caixa(CaixaNoABB* C)
+{	
+	CaixaNoABB *C_pai = NULL;
+
+	while(C != NULL)
+	{
+		C_pai = C;
+		C = C->esq;
+	}
+	return C_pai;
+}
+
+int retirar_prox_no(CaixaNoABB **C)
+{
+	if(*C == NULL) return 0;
+	CaixaNoABB  *p = *C,*remov = consultar_prox_caixa(*C), *remov_pai = NULL;
+
+	while(p != remov)
+	{
+		remov_pai = p;
+		p = p->esq;
+	}
+	if(remov_pai == NULL)
+	{
+		(*C) = remov->dir;
+		free(remov);
+		return 1;
+	}
+	remov_pai->esq = remov->dir;
+	free(remov);
+	return 1;
+}

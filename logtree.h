@@ -2,7 +2,7 @@
 #define LOGTREE_H
 	#include <stdlib.h>
 	#include <stdio.h>
-	
+	#include <string.h>
 	typedef struct Log
 	{
 		//Estrutura Arvore
@@ -16,6 +16,17 @@
 		int caixa;
 		
 	}Log;
+
+	typedef struct CaixaNoABB
+	{
+		int tempo;
+		int caixa;
+		char tipo[20];
+		int conta;
+		int oper;
+		struct CaixaNoABB *dir;
+		struct CaixaNoABB *esq;
+	}CaixaNoABB;
 	
 	void inicializar(Log **l);
 	Log *criar_no(int conta, int classe, int timer, int caixa);
