@@ -1,5 +1,6 @@
 #include "escalonador.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 int e_inicializar(Escalonador **e, int caixas, int delta_t, int n_1, int n_2, int n_3, int n_4, int n_5)
 {
@@ -145,6 +146,7 @@ int e_obter_prox_num_conta(Escalonador *e)
 
 int e_consultar_prox_qtde_oper(Escalonador *e)
 {
+    //Verificar se a conta está vazia.
     int conta_prox = e_consultar_prox_num_conta(e);
     int conta_1 = f_consultar_proxima_chave(&e->fila_1);
     int conta_2 = f_consultar_proxima_chave(&e->fila_2);
@@ -160,6 +162,25 @@ int e_consultar_prox_qtde_oper(Escalonador *e)
     else if(conta_prox == conta_5) return f_consultar_proximo_valor(&e->fila_5);
     else return -1;
 }
+
+int e_consultar_prox_fila (Escalonador *e)
+{
+    int conta_prox = e_consultar_prox_num_conta(e);
+    int conta_1 = f_consultar_proxima_chave(&e->fila_1);
+    int conta_2 = f_consultar_proxima_chave(&e->fila_2);
+    int conta_3 = f_consultar_proxima_chave(&e->fila_3);
+    int conta_4 = f_consultar_proxima_chave(&e->fila_4);
+    int conta_5 = f_consultar_proxima_chave(&e->fila_5);
+
+
+    if(conta_prox == conta_1) return 1;
+    else if(conta_prox == conta_2) return 2;
+    else if(conta_prox == conta_3) return 3;
+    else if(conta_prox == conta_4) return 4;
+    else if(conta_prox == conta_5) return 5;
+    else return -1;
+}
+
 int main()
 {
     Escalonador *e;
@@ -172,14 +193,14 @@ int main()
     int conta = e_consultar_prox_num_conta(e);
     int q;
     printf("\nOperacoes: %d Proxima Conta: %d", e_consultar_prox_qtde_oper(e), conta);
-
-    /*
+    printf("\nProx fila: %d",e_consultar_prox_fila(e));
+    
     while(e_consultar_prox_num_conta(e) > 0)
     {
         q = e_consultar_prox_qtde_oper(e);
         conta = e_obter_prox_num_conta(e);
         printf("\nOperacoes: %d Proxima Conta: %d", q, conta);
     }
-    */
+    
    return 0;
 }

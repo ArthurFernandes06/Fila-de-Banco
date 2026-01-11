@@ -42,6 +42,7 @@ int f_inserir(Fila_FIFO **f,int chave, int valor)
 
 int f_obter_proxima_chave(Fila_FIFO **f)
 {
+	if(*f == NULL) return -1;
 	NoFila *remov = (*f)->prim;
 	if (remov == NULL) return -1;
 	
@@ -63,6 +64,7 @@ int f_obter_proxima_chave(Fila_FIFO **f)
 int f_consultar_proxima_chave(Fila_FIFO **f)
 {
 	if(*f == NULL) return -1;
+	if((*f)->prim == NULL) return -1;
 	
 	return (*f)->prim->chave;
 }
