@@ -14,6 +14,7 @@
 		int conta;
 		int classe;
 		int caixa;
+		int oper;
 		
 	}Log;
 
@@ -30,11 +31,13 @@
 	}CaixaNoABB;
 	
 	void inicializar(Log **l);
-	Log *criar_no_log(int conta, int classe, int timer, int caixa);
-	int log_registrar(Log **l, int conta, int classe, int timer, int caixa);
+	Log *criar_no_log(int conta, int classe, int timer, int caixa, int oper);
+	int log_registrar(Log **l, int conta, int classe, int timer, int caixa,int oper);
 	float log_media_por_classe(Log **l, int classe);
 	int log_obter_soma_por_classe(Log **l, int classe);
 	int log_obter_contagem_por_classe(Log **l, int classe);
+	int log_obter_contagem_oper_por_classe(Log **l, int classe);
+	int log_obter_contagem_por_caixa(Log **l, int caixa);
 	CaixaNoABB *criar_no_caixa(int caixa, int tempo_saida,int tempo_entrada, int tipo, int conta, int oper);
 	int c_adicionar_caixa_abb(CaixaNoABB **C, int caixa, int tempo_saida,int tempo_entrada, int tipo, int conta, int oper);
 	CaixaNoABB *c_consultar_prox_caixa(CaixaNoABB* C);

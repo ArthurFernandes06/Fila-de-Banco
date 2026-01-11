@@ -291,25 +291,45 @@ int e_conf_por_arquivo (Escalonador **e, char *nome_arq_conf)
 }
 void e_rodar(Escalonador **e, char *nome_arq_in, char *nome_arq_out)
 {
+    /*
+    essa função funciona por meio de uma lista de prioridade implementada com uma Árvore binária de busca,
+    na qual a prioridade é o tempo de saida, primeiro preenche ela escrevendo 0 para chamada ao caixa,
+    depois ela remove o cliente que sai mais cedo do menor caixa, e esse tempo de saida é o tempo de entrada
+    de outro cliente então já é escrito no arquivo de saida esse tempo, e enquanto tiver gente para tirar
+    dessa Lista de prioridade, em paralelo enquanto tiver clientes no escalonador é adicionado a ela.
+    */
+
+    //Preenchendo o escalonador com os dados do arquivo de entrada.
     e_conf_por_arquivo(e,nome_arq_in);
     FILE *arq = fopen(nome_arq_out, "w");
-    int t_lista_caixa = 0;
+    int t_lista_caixa = 0;//Váriavel para guardar o tamanho da Lista de prioridade
     int caixa = 1;
     int oper, tipo,conta;
-    int tempo_saida,tempo_entrada;
+    int tempo_saida,tempo_entrada,tempo_total = 0;
     char categoria[32];
 
+    /*
+    Aqui eu estou declarando dois ponteiros, O 'C' que é a lista de prioridade,
+    e o C_atual que será o ponteiro que recebe o próximo cliente que vai entrar no caixa.
+    */
     CaixaNoABB *C = NULL;
     CaixaNoABB *C_atual = NULL;
 
+    //Registros
+    Log *l = NULL;
+
     while(t_lista_caixa < (*e)->caixas && e_consultar_qtde_clientes(*e) > 0)
     {
+        /*
+        Aqui é onde começa a preencher os caixas e preencher o arquivo para T = 0.
+        */
         oper = e_consultar_prox_qtde_oper(*e);
         tipo = e_consultar_prox_fila(*e);
         conta = e_obter_prox_num_conta(*e);
 
         c_adicionar_caixa_abb(&C, caixa, (*e)->delta_t * oper,0, tipo, conta, oper);
-        
+        log_registrar(&l,conta,tipo, 0 ,caixa,oper);
+
         if(tipo == 1) strcpy(categoria, "Premium");
         else if(tipo == 2) strcpy(categoria,"Ouro");
         else if(tipo == 3) strcpy(categoria,"Prata");
@@ -327,7 +347,11 @@ void e_rodar(Escalonador **e, char *nome_arq_in, char *nome_arq_out)
 
     while(t_lista_caixa > 0)
     {  
-        
+        /*
+        Como os caixas já estão preenchidos, aqui ele vai ser esvaziado,
+        a medida que esvazia entra um novo cliente de acordo com a disciplina de atendimento,
+        que tera tempo_entrada = tempo_saida(do cliente que saiu).
+        */
         if(e_consultar_qtde_clientes(*e) > 0)
         {
             C_atual = c_consultar_prox_caixa(C);
@@ -344,6 +368,7 @@ void e_rodar(Escalonador **e, char *nome_arq_in, char *nome_arq_out)
             tempo_entrada = C_atual->tempo_saida;
             tempo_saida = tempo_entrada + oper*(*e)->delta_t;
             c_adicionar_caixa_abb(&C,C_atual->caixa,tempo_saida,tempo_entrada,tipo,conta,oper);
+            log_registrar(&l,conta,tipo,tempo_entrada,caixa,oper);
 
             fprintf(arq,"T = %d min: Caixa %d chama da categoria %s cliente da conta %d para realizar %d operacao(oes).\n",
             tempo_entrada,caixa,categoria,conta,oper);
@@ -351,12 +376,46 @@ void e_rodar(Escalonador **e, char *nome_arq_in, char *nome_arq_out)
             t_lista_caixa++;
 
         }
+        if(tempo_total < tempo_saida) tempo_total = tempo_saida;
         c_retirar_prox_no(&C);
         t_lista_caixa--;
     }
+    int clientes_premium = log_obter_contagem_por_classe(&l,1);
+    int clientes_ouro = log_obter_contagem_por_classe(&l,2);
+    int clientes_prata = log_obter_contagem_por_classe(&l,3);
+    int clientes_bronze = log_obter_contagem_por_classe(&l,4);
+    int clientes_comum = log_obter_contagem_por_classe(&l,5);
+
+    float tempo_premium = log_media_por_classe(&l,1);
+    float tempo_ouro = log_media_por_classe(&l,2);
+    float tempo_prata = log_media_por_classe(&l,3);
+    float tempo_bronze = log_media_por_classe(&l,4);
+    float tempo_comum = log_media_por_classe(&l,5);
 
 
-    
 
+    fprintf(arq,"Tempo total de atendimento: %d minutos.\n",tempo_total);
+    fprintf(arq,"Tempo medio de espera dos %d clientes Premium: %.2f\n", clientes_premium,tempo_premium);
+    fprintf(arq,"Tempo medio de espera dos %d clientes Ouro: %.2f\n", clientes_ouro, tempo_ouro);
+    fprintf(arq,"Tempo medio de espera dos %d clientes Prata: %.2f\n", clientes_prata, tempo_prata);
+    fprintf(arq,"Tempo medio de espera dos %d clientes Bronze: %.2f\n",clientes_bronze, tempo_bronze);
+    fprintf(arq,"Tempo medio de espera dos %d clientes Comuns: %.2f\n",clientes_comum, tempo_comum);
+
+    float m_oper_premium = (float)log_obter_contagem_oper_por_classe(&l,1)/clientes_premium;
+    float m_oper_ouro = (float)log_obter_contagem_oper_por_classe(&l,2)/clientes_ouro;
+    float m_oper_prata = (float)log_obter_contagem_oper_por_classe(&l,3)/clientes_prata;
+    float m_oper_bronze = (float)log_obter_contagem_oper_por_classe(&l,4)/clientes_bronze;
+    float m_oper_leezu = (float)log_obter_contagem_oper_por_classe(&l,5)/clientes_comum;
+
+    fprintf(arq,"Quantidade media de operacoes por cliente Premium = %.2f\n",m_oper_premium);
+    fprintf(arq,"Quantidade media de operacoes por cliente Ouro = %.2f\n", m_oper_ouro);
+    fprintf(arq,"Quantidade media de operacoes por cliente Prata = %.2f\n", m_oper_prata);
+    fprintf(arq,"Quantidade media de operacoes por cliente Bronze = %.2f\n", m_oper_bronze);
+    fprintf(arq,"Quantidade media de operacoes por cliente Leezu = %.2f\n",m_oper_leezu);
+
+    for(int i = 1; i<= (*e)->caixas; ++i)
+    {
+        fprintf(arq,"O caixa de número %d atendeu %d clientes.\n",i, log_obter_contagem_por_caixa(&l,i));
+    }
     fclose(arq);
 }

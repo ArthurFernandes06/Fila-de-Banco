@@ -3,12 +3,12 @@ void inicializar(Log **l)
 {
 	(*l) = NULL;
 }
-Log *criar_no_log(int conta, int classe, int timer, int caixa)
+Log *criar_no_log(int conta, int classe, int timer, int caixa,int oper)
 {
 	Log *novo = malloc(sizeof(Log));
 	if (novo == NULL) return NULL;
 	
-	//Info da arvore RB
+	//Info da arvore 
 	novo->dir = NULL;
 	novo->esq = NULL;
 	
@@ -17,11 +17,14 @@ Log *criar_no_log(int conta, int classe, int timer, int caixa)
 	novo->classe = classe;
 	novo->caixa = caixa;
 	novo->tempo = timer;
+	novo->oper = oper;
+
+	return novo;
 }
 
-int log_registrar(Log **l, int conta, int classe, int timer, int caixa)
+int log_registrar(Log **l, int conta, int classe, int timer, int caixa,int oper)
 {
-	Log *novo = criar_no_log(conta,classe,timer,caixa);
+	Log *novo = criar_no_log(conta,classe,timer,caixa,oper);
 	if (novo == NULL) return 0;
 	
 	Log *p = (*l);
@@ -70,12 +73,36 @@ int log_obter_contagem_por_classe(Log **l, int classe)
 	}
 }
 
+int log_obter_contagem_oper_por_classe(Log **l, int classe)
+{
+	if(*l != NULL)
+	{
+		if((*l)->classe == classe) return log_obter_contagem_oper_por_classe(&(*l)->dir,classe) + log_obter_contagem_oper_por_classe(&(*l)->esq,classe) + (*l)->oper;
+		else return log_obter_contagem_oper_por_classe(&(*l)->dir,classe) + log_obter_contagem_oper_por_classe(&(*l)->esq,classe);
+			
+	}else
+	{
+		return 0;
+	}
+}
+int log_obter_contagem_por_caixa(Log **l, int caixa)
+{
+	if(*l != NULL)
+	{
+		if((*l)->caixa == caixa) return log_obter_contagem_por_caixa(&(*l)->dir,caixa) + log_obter_contagem_por_caixa(&(*l)->esq,caixa) + 1;
+		else return log_obter_contagem_por_caixa(&(*l)->dir,caixa) + log_obter_contagem_por_caixa(&(*l)->esq,caixa);
+			
+	}else
+	{
+		return 0;
+	}
+}
 float log_media_por_classe(Log **l, int classe)
 {
 	int total = log_obter_contagem_por_classe(l,classe);
 	if (total == 0) return 0;
 	
-	return log_obter_soma_por_classe(l,classe)/total;
+	return (float)log_obter_soma_por_classe(l,classe)/total;
 }
 
 CaixaNoABB *criar_no_caixa(int caixa, int tempo_saida,int tempo_entrada, int tipo, int conta, int oper)
